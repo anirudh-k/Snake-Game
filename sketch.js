@@ -7,14 +7,27 @@ var scl = 20;
 // a vector
 var food;
 
+var pause = false;
+
 // sets the location of the food to a random square on the grid
 function pickLocation() {
    // this is done to ensure the space picked is on the grid
    var cols = floor(width/scl);
    var rows = floor(height/scl);
 
-   food = createVector(floor(random(cols)), floor(random(rows)));
-   food.mult(scl);
+   var foodX = floor(random(cols)) * scl;
+   var foodY = floor(random(rows)) * scl;
+
+   for (var i = 0; i < s.tail.length; i++) {
+      if ((foodX === s.tail[i].x) && (foodY === s.tail[i].y)) {
+         foodX = floor(random(cols)) * scl;
+         foodY = floor(random(rows)) * scl;
+
+         i = 0;
+      }
+   }
+
+   food = createVector(foodX, foodY);
 }
 
 // required for p5
@@ -34,7 +47,7 @@ function draw() {
    background(51);
 
    s.death();
-   s.update();
+   s.update(pause);
    s.show();
 
    if (s.eat(food)) {
@@ -49,27 +62,28 @@ function draw() {
 // moves the snake object based on what key was pressed
 function keyPressed() {
    if (keyCode === 38) { // up arrow
-      if (((s.xSpeed === 0) && (s.ySpeed === -1))) {
-      } else {
+      // if the Snake is moving down, do not allow it to move up (unless it is one unit long)
+      if (!((s.xSpeed === 0) && (s.ySpeed === 1)) || (s.total === 0)) {
          s.dir(0, -1);
       }
    } else if (keyCode === 40) { // down arrow
-      if (((s.xSpeed === 0) && (s.ySpeed === 1))) {
-      } else {
+      // if the Snake is already moving up, do not allow it to move down (unless it is one unit long)
+      if (!((s.xSpeed === 0) && (s.ySpeed === -1)) || (s.total === 0)) {
          s.dir(0, 1);
       }
    } else if (keyCode === 37) { // left arrow
-      if (((s.xSpeed === -1) && (s.ySpeed === 0))) {
-      } else {
+      // if the Snake is already moving right, do not allow it to move left (unless it is one unit long)
+      if (!((s.xSpeed === 1) && (s.ySpeed === 0)) || (s.total === 0)) {
          s.dir(-1, 0);
       }
    } else if (keyCode === 39) { // right arrow
-      if (((s.xSpeed === 1) && (s.ySpeed === 0))) {
-      } else {
+      // if the Snake is already moving left, do not allow it to move right (unless it is one unit long)
+      if (!((s.xSpeed === -1) && (s.ySpeed === 0)) || (s.total === 0)) {
          s.dir(1, 0);
       }
    } else if (keyCode === 80) { // p key (to pause)
-      //pickLocation();
       pause = !pause;
+   } else if (keyCode === 82) {
+      pickLocation();
    }
 }
